@@ -1,0 +1,100 @@
+@import "tailwindcss";
+
+@theme {
+  /* Base oscura azul medianoche (no negro puro) */
+  --color-midnight: #06121f;
+  --color-midnight-700: #0a1b2e;
+  --color-midnight-600: #0f2640;
+  --color-midnight-500: #163b5c;
+
+  /* Celeste Argentina */
+  --color-celeste: #74b9e8;
+  --color-celeste-bright: #9ad4ff;
+  --color-celeste-deep: #3d8fcf;
+
+  /* Sol de Mayo / dorado */
+  --color-sol: #f4c84e;
+  --color-sol-bright: #ffd45e;
+
+  /* Tinta / neutros */
+  --color-ink: #e8f1fa;
+  --color-ink-dim: #8aa3ba;
+  --color-line: rgba(146, 188, 224, 0.14);
+
+  --font-display: var(--font-anton), "Arial Narrow", sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-midnight);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background: var(--color-sol);
+    color: #06121f;
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: var(--font-display);
+    letter-spacing: 0.01em;
+  }
+
+  /* Textura de grano sutil para que no se vea plano/IA */
+  .grain::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.06;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Rayas tipo camiseta (celeste/blanco) */
+  .jersey-stripes {
+    background-image: repeating-linear-gradient(
+      90deg,
+      rgba(116, 185, 232, 0.0) 0px,
+      rgba(116, 185, 232, 0.0) 48px,
+      rgba(116, 185, 232, 0.07) 48px,
+      rgba(116, 185, 232, 0.07) 96px
+    );
+  }
+
+  .glow-celeste {
+    background: radial-gradient(
+      60% 60% at 50% 0%,
+      rgba(116, 185, 232, 0.22) 0%,
+      rgba(116, 185, 232, 0) 70%
+    );
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Marquee sponsors */
+  .marquee-track {
+    animation: marquee 28s linear infinite;
+  }
+
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+}

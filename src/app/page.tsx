@@ -1,24 +1,18 @@
-import Nav from "@/components/Nav";
+import Bunting from "@/components/Bunting";
 import Hero from "@/components/Hero";
-import StatsStrip from "@/components/StatsStrip";
-import FeatureCards from "@/components/FeatureCards";
-import UpcomingMatches from "@/components/UpcomingMatches";
-import SorteoBand from "@/components/SorteoBand";
-import SponsorsMarquee from "@/components/SponsorsMarquee";
+import Countdown from "@/components/Countdown";
+import ActionCards from "@/components/ActionCards";
+import Stats from "@/components/Stats";
 import Footer from "@/components/Footer";
 
 export default function Home() {
   return (
     <>
-      <Nav />
-      <main>
-        <Hero />
-        <StatsStrip />
-        <FeatureCards />
-        <UpcomingMatches />
-        <SorteoBand />
-        <SponsorsMarquee />
-      </main>
+      <Bunting intensity={1} />
+      <Hero />
+      <Countdown />
+      <ActionCards />
+      <Stats />
       <Footer />
     </>
   );

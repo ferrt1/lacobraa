@@ -1,52 +1,50 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import { Flag } from "./ui";
 
-type Parts = { dias: number; hs: number; min: number; seg: number };
-
-function diff(target: number): Parts {
-  const ms = Math.max(0, target - Date.now());
-  const s = Math.floor(ms / 1000);
-  return {
-    dias: Math.floor(s / 86400),
-    hs: Math.floor((s % 86400) / 3600),
-    min: Math.floor((s % 3600) / 60),
-    seg: s % 60,
+export default function Countdown() {
+  const target = new Date("2026-06-11T13:00:00-03:00").getTime();
+  const calc = () => {
+    const diff = Math.max(0, target - Date.now());
+    return {
+      d: Math.floor(diff / 86400000),
+      h: Math.floor((diff % 86400000) / 3600000),
+      m: Math.floor((diff % 3600000) / 60000),
+      s: Math.floor((diff % 60000) / 1000),
+    };
   };
-}
-
-export default function Countdown({ to }: { to: string }) {
-  const target = new Date(to).getTime();
-  const [parts, setParts] = useState<Parts | null>(null);
-
+  const [t, setT] = useState(calc);
   useEffect(() => {
-    setParts(diff(target));
-    const id = setInterval(() => setParts(diff(target)), 1000);
+    const id = setInterval(() => setT(calc()), 1000);
     return () => clearInterval(id);
-  }, [target]);
-
-  const cells: [string, number][] = [
-    ["días", parts?.dias ?? 0],
-    ["hs", parts?.hs ?? 0],
-    ["min", parts?.min ?? 0],
-    ["seg", parts?.seg ?? 0],
+  }, []);
+  const pad = (x: number) => String(x).padStart(2, "0");
+  const units = [
+    { v: t.d, l: "Días" },
+    { v: pad(t.h), l: "Horas" },
+    { v: pad(t.m), l: "Min" },
+    { v: pad(t.s), l: "Seg", sec: true },
   ];
-
   return (
-    <div className="flex gap-2">
-      {cells.map(([label, val]) => (
-        <div
-          key={label}
-          className="flex min-w-[3.5rem] flex-col items-center rounded-xl border border-line bg-midnight-700/60 px-3 py-2"
-        >
-          <span className="font-display text-2xl leading-none text-ink tabular-nums">
-            {parts ? String(val).padStart(2, "0") : "--"}
-          </span>
-          <span className="mt-1 text-[10px] uppercase tracking-widest text-ink-dim">
-            {label}
-          </span>
+    <div className="countdown wrap">
+      <div className="cd-card">
+        <div className="cd-left">
+          <div className="cd-kicker">
+            <Flag code="ar" cls="cd-flag" /><Flag code="mx" cls="cd-flag" /><Flag code="us" cls="cd-flag" /><Flag code="ca" cls="cd-flag" />
+            <span className="label gold">Arranca el 11 de junio</span>
+          </div>
+          <p className="cd-title">Falta nada para el <b>Mundial 2026</b></p>
         </div>
-      ))}
+        <div className="cd-units">
+          {units.map((u) => (
+            <div key={u.l} className={"cd-unit" + (u.sec ? " sec" : "")}>
+              <div className="cd-num" suppressHydrationWarning>{u.v}</div>
+              <div className="cd-lab">{u.l}</div>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

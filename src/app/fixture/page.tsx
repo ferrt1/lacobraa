@@ -1,16 +1,10 @@
 import type { Metadata } from "next";
 import Footer from "@/components/Footer";
+import FixtureClient from "./FixtureClient";
 
 export const metadata: Metadata = {
   title: "Fixture · La Cobra · Mundial 2026",
 };
-
-// ───────────────────────────────────────────────────────────────────────
-// PÁGINA FIXTURE — esqueleto (la trabaja el amigo).
-// Hereda el sidebar/nav del layout y el sistema visual (styles en globals.css).
-// Clases útiles del DS: .wrap .section .section-head .label .qcard .panel ...
-// Datos: mock; equipos/resultados plausibles del Mundial 2026.
-// ───────────────────────────────────────────────────────────────────────
 
 export default function FixturePage() {
   return (
@@ -19,12 +13,13 @@ export default function FixturePage() {
         <div className="wrap">
           <div className="section-head">
             <span className="label celeste">Fixture</span>
-            <h2>El fixture del Mundial</h2>
-            <p>Los 48 equipos, 12 grupos y todos los cruces. Del 11 de junio al 19 de julio. (En construcción — arrancá desde acá.)</p>
+            <h2>Mundial 2026</h2>
+            <p>
+              48 equipos, 12 grupos, del 11 de junio al 19 de julio.
+              Seguí todos los partidos y predecí los resultados con la banda.
+            </p>
           </div>
-          <div className="qcard" style={{ textAlign: "center", alignItems: "center", justifyContent: "center" }}>
-            <p>🏗️ Acá va el fixture. Mirá los comentarios en <code style={{ color: "var(--celeste)" }}>src/app/fixture/page.tsx</code>.</p>
-          </div>
+          <FixtureClient />
         </div>
       </section>
       <Footer />

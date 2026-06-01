@@ -1,4 +1,5 @@
 import { I } from "./ui";
+import GoalFrame from "./GoalFrame";
 
 const EMBLEM = "/emblema-26.png";
 
@@ -27,14 +28,32 @@ function Rings({ opacity = 0.5 }: { opacity?: number }) {
 
 export default function Hero() {
   return (
-    <section className="hero hv-rings" id="top">
+    <section className="hero hv-rings hv-goal" id="top">
       <div className="hero-bg">
-        <Rings opacity={0.5} />
-        <div className="hero-glow" style={{ width: "520px", height: "520px", top: "-160px", right: "-80px", background: "var(--celeste)" }} />
-        <div className="hero-glow" style={{ width: "380px", height: "380px", bottom: "-140px", left: "-100px", background: "var(--celeste-deep)", opacity: 0.3 }} />
+        <Rings opacity={0.35} />
+        <div
+          className="hero-glow"
+          style={{ width: "520px", height: "520px", top: "-160px", right: "-80px", background: "var(--celeste)" }}
+        />
+        <div
+          className="hero-glow"
+          style={{
+            width: "380px",
+            height: "380px",
+            bottom: "-140px",
+            left: "-100px",
+            background: "var(--celeste-deep)",
+            opacity: 0.3,
+          }}
+        />
         <div className="hero-vignette" />
       </div>
-      <div className="hero-inner">
+
+      {/* spotlights laterales (sutiles) */}
+      <div className="hero-spot l" aria-hidden />
+      <div className="hero-spot r" aria-hidden />
+
+      <GoalFrame>
         <div className="hero-copy">
           <div className="hero-eyebrow">
             <span className="dot" />
@@ -54,9 +73,10 @@ export default function Hero() {
           </div>
         </div>
         <div className="hero-media">
+          <div className="emblem-halo" aria-hidden />
           <img className="emblem big" src={EMBLEM} alt="Mundial 26" />
         </div>
-      </div>
+      </GoalFrame>
     </section>
   );
 }

@@ -45,7 +45,10 @@ Mirá la **home** (`src/app/page.tsx` + componentes en `src/components/`) como r
 - ✅ **Fixture** lo hiciste vos (gracias 🙌). Quedó funcional.
 - ✅ **Hero rediseñado a fondo** — ahora es una escena de **estadio de noche con un arco de fútbol**
   (ver sección de abajo). Entra todo en una pantalla, fondo continuo, mobile contemplado.
-- 🔜 **Fer arranca `/album`** (solo diseño). **No lo toques** — es la página de Fer.
+- ✅ **`/album` hecho (es de Fer — NO lo toques).** Álbum de figuritas estilo Panini: tapa + libro
+  con logo de la selección (izq) + grilla de convocados (der), guarda de arcos, **estación de packs**
+  (apertura de a una), buscador y modal de jugador. Archivos PROPIOS, no tocan `globals.css`:
+  `src/app/album/{page.tsx,AlbumClient.tsx,album.css}` + `src/lib/album-data.ts`. Sin fotos (licenciadas) → figuritas estilizadas.
 - ⏳ Pendientes: predicciones, sorteos, ranking, perfil.
 
 ## ⚠️ Hero / "el campo" — arquitectura (NO lo rompas, Nahu)

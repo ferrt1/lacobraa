@@ -69,7 +69,7 @@ export default function GoalFrame({ children }: { children: ReactNode }) {
       topTrans = $("topTransverse"),
       topKnots = $("topKnots");
     const TOP_N = 22,
-      TOP_T = 5;
+      TOP_T = 9;
     if (topDepth) for (let i = 1; i < TOP_N; i++) {
       const t = i / TOP_N;
       const pf = lerp(A, B, t),
@@ -80,9 +80,7 @@ export default function GoalFrame({ children }: { children: ReactNode }) {
       const s = j / (TOP_T + 1);
       const pl = lerp(A, D, s),
         pr = lerp(B, C_, s);
-      const mx = (pl.x + pr.x) / 2;
-      const my = (pl.y + pr.y) / 2 + 2 + s * 3;
-      path(topTrans, `M ${pl.x} ${pl.y} Q ${mx} ${my} ${pr.x} ${pr.y}`);
+      line(topTrans, pl.x, pl.y, pr.x, pr.y); // rectas, igual que los costados
     }
     if (topKnots) for (let i = 1; i < TOP_N; i++) {
       const t = i / TOP_N;
@@ -129,21 +127,29 @@ export default function GoalFrame({ children }: { children: ReactNode }) {
       line(rightTrans, pTop.x, pTop.y, pBot.x, pBot.y);
     }
 
-    // BOTTOM piso interior
-    const bottomDepth = $("bottomDepth");
-    const BOT_N = 22;
+    // BOTTOM piso interior — profundidad + transversales (grilla, no solo líneas)
+    const bottomDepth = $("bottomDepth"),
+      bottomTrans = $("bottomTransverse");
+    const BOT_N = TOP_N; // mismas divisiones que el techo → verticales continuas
     if (bottomDepth) for (let i = 1; i < BOT_N; i++) {
       const t = i / BOT_N;
       const pf = lerp(F, H, t),
         pb = lerp(E, G, t);
       line(bottomDepth, pf.x, pf.y, pb.x, pb.y);
     }
+    const BOT_T = SIDE_N; // mismas divisiones que los costados → cruces alineadas
+    if (bottomTrans) for (let j = 1; j < BOT_T; j++) {
+      const s = j / BOT_T;
+      const pl = lerp(F, E, s),
+        pr = lerp(H, G, s);
+      line(bottomTrans, pl.x, pl.y, pr.x, pr.y);
+    }
 
-    // BACK panel accent ropes
+    // BACK panel — verticales alineadas con el techo, horizontales con los costados
     const backV = $("backVertical"),
       backH = $("backHorizontal");
-    const BV = 30,
-      BH = 14;
+    const BV = TOP_N,  // verticales arrancan donde llegan las del techo
+      BH = SIDE_N;     // horizontales arrancan donde llegan las de los costados
     if (backV) for (let i = 1; i < BV; i++) {
       const x = 190 + (720 * i) / BV;
       line(backV, x, 160, x, 480);
@@ -156,6 +162,10 @@ export default function GoalFrame({ children }: { children: ReactNode }) {
 
   return (
     <div className="goal">
+      {/* piso full-bleed: extiende el pasto del arco hasta los bordes de la sección.
+          top alineado a la línea de cal del SVG (y=540 de 620). Va detrás del SVG. */}
+      <div className="goal-floor" aria-hidden />
+
       <svg
         ref={ref}
         className="goal-svg"
@@ -173,7 +183,7 @@ export default function GoalFrame({ children }: { children: ReactNode }) {
           <linearGradient id="barG" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="#ffffff" />
             <stop offset="40%" stopColor="#e3ecf6" />
-            <stop offset="100%" stopColor="#363d4e" />
+            <stop offset="100%" stopColor="#9aa6ba" />
           </linearGradient>
           <linearGradient id="backPostG" x1="0" y1="0" x2="1" y2="0">
             <stop offset="0%" stopColor="#3a4252" />
@@ -194,10 +204,9 @@ export default function GoalFrame({ children }: { children: ReactNode }) {
             <stop offset="0%" stopColor="rgba(255,255,255,0.12)" />
             <stop offset="100%" stopColor="rgba(255,255,255,0)" />
           </linearGradient>
-          <pattern id="netBack" width="22" height="22" patternUnits="userSpaceOnUse">
-            <path d="M0 11 L11 0 L22 11 L11 22 Z" fill="none" stroke="#cfd8e6" strokeWidth="0.6" opacity="0.5" />
-            <circle cx="11" cy="0" r="0.9" fill="#fff" opacity="0.6" />
-            <circle cx="11" cy="22" r="0.9" fill="#fff" opacity="0.6" />
+          <pattern id="netBack" width="20" height="20" patternUnits="userSpaceOnUse">
+            <path d="M0 0 H20 M0 0 V20" fill="none" stroke="#cfd8e6" strokeWidth="0.6" opacity="0.5" />
+            <circle cx="0" cy="0" r="0.85" fill="#fff" opacity="0.55" />
           </pattern>
           <linearGradient id="postHL" x1="0" y1="0" x2="0" y2="1">
             <stop offset="0%" stopColor="rgba(255,255,255,0.85)" />
@@ -211,9 +220,9 @@ export default function GoalFrame({ children }: { children: ReactNode }) {
 
         {/* 2 · back panel */}
         <rect x="190" y="160" width="720" height="320" fill="#040810" opacity="0.65" />
-        <rect x="190" y="160" width="720" height="320" fill="url(#netBack)" />
-        <g id="backVertical" data-ropes stroke="#aeb9cc" strokeWidth="0.55" opacity="0.42" />
-        <g id="backHorizontal" data-ropes stroke="#aeb9cc" strokeWidth="0.55" opacity="0.35" />
+        {/* red del fondo: grilla alineada con techo (verticales) y costados (horizontales) */}
+        <g id="backVertical" data-ropes stroke="#cfd8e6" strokeWidth="0.6" opacity="0.42" />
+        <g id="backHorizontal" data-ropes stroke="#cfd8e6" strokeWidth="0.55" opacity="0.4" />
 
         {/* back stanchions — marco trasero cerrado */}
         <line x1="190" y1="160" x2="910" y2="160" stroke="url(#backPostG)" strokeWidth="6" strokeLinecap="round" />
@@ -227,18 +236,17 @@ export default function GoalFrame({ children }: { children: ReactNode }) {
         {/* 3 · TOP panel */}
         <path d="M 92 82 L 1008 82 L 910 160 L 190 160 Z" fill="#04070f" opacity="0.95" />
         <path d="M 92 82 L 1008 82 L 1000 96 L 100 96 Z" fill="rgba(255,255,255,0.07)" />
-        <g id="topDepth" data-ropes stroke="#dbe4f2" strokeWidth="0.7" opacity="0.7" fill="none" />
-        <g id="topTransverse" data-ropes stroke="#dbe4f2" strokeWidth="0.65" opacity="0.55" fill="none" />
-        <g id="topKnots" data-ropes fill="#fff" opacity="0.6" />
+        <g id="topDepth" data-ropes stroke="#cfd8e6" strokeWidth="0.6" opacity="0.42" fill="none" />
+        <g id="topTransverse" data-ropes stroke="#cfd8e6" strokeWidth="0.55" opacity="0.4" fill="none" />
 
         {/* 4 · LEFT side */}
         <path d="M 92 82 L 190 160 L 190 480 L 92 540 Z" fill="#04070f" opacity="0.9" />
-        <g id="leftDepth" data-ropes stroke="#cfd8e6" strokeWidth="0.6" opacity="0.45" fill="none" />
+        <g id="leftDepth" data-ropes stroke="#cfd8e6" strokeWidth="0.6" opacity="0.42" fill="none" />
         <g id="leftTransverse" data-ropes stroke="#cfd8e6" strokeWidth="0.55" opacity="0.4" fill="none" />
 
         {/* 5 · RIGHT side */}
         <path d="M 1008 82 L 910 160 L 910 480 L 1008 540 Z" fill="#04070f" opacity="0.9" />
-        <g id="rightDepth" data-ropes stroke="#cfd8e6" strokeWidth="0.6" opacity="0.45" fill="none" />
+        <g id="rightDepth" data-ropes stroke="#cfd8e6" strokeWidth="0.6" opacity="0.42" fill="none" />
         <g id="rightTransverse" data-ropes stroke="#cfd8e6" strokeWidth="0.55" opacity="0.4" fill="none" />
 
         {/* 6 · tensores estructurales */}
@@ -251,37 +259,37 @@ export default function GoalFrame({ children }: { children: ReactNode }) {
 
         {/* 7 · piso interior */}
         <path d="M 92 540 L 190 480 L 910 480 L 1008 540 Z" fill="#04070f" opacity="0.9" />
-        <g id="bottomDepth" data-ropes stroke="#cfd8e6" strokeWidth="0.55" opacity="0.35" fill="none" />
+        <g id="bottomDepth" data-ropes stroke="#cfd8e6" strokeWidth="0.6" opacity="0.42" fill="none" />
+        <g id="bottomTransverse" data-ropes stroke="#cfd8e6" strokeWidth="0.55" opacity="0.4" fill="none" />
 
         {/* 8 · ceiling glow */}
         <rect x="92" y="82" width="916" height="180" fill="url(#frontGlow)" />
 
-        {/* 9 · grass + línea de cal interrumpida por los postes */}
-        <path d="M 0 540 L 1100 540 L 1100 620 L 0 620 Z" fill="url(#grass)" />
-        <rect x="0" y="538" width="60" height="3" fill="rgba(255,255,255,0.62)" />
-        <rect x="92" y="538" width="916" height="3" fill="rgba(255,255,255,0.62)" />
-        <rect x="1040" y="538" width="60" height="3" fill="rgba(255,255,255,0.62)" />
+        {/* 9 · grass + línea de cal → ahora las provee .goal-floor (full-bleed) en CSS,
+              para que el pasto sea UNO solo y no se vea el escalón con la franja. */}
 
-        {/* 10 · FRONT FRAME — soldado en L, plantado en pasto */}
-        <ellipse cx="81" cy="552" rx="36" ry="5" fill="rgba(0,0,0,0.65)" />
-        <ellipse cx="1019" cy="552" rx="36" ry="5" fill="rgba(0,0,0,0.65)" />
-        <ellipse cx="81" cy="560" rx="56" ry="7" fill="rgba(0,0,0,0.35)" />
-        <ellipse cx="1019" cy="560" rx="56" ry="7" fill="rgba(0,0,0,0.35)" />
+        {/* 10 · FRONT FRAME — soldado en L, plantado en pasto.
+              Postes hundidos hasta y=560 (la línea de cal/pasto está en y=540),
+              así no flotan. Sombra de contacto en la base. */}
+        <ellipse cx="81" cy="558" rx="38" ry="6" fill="rgba(0,0,0,0.72)" />
+        <ellipse cx="1019" cy="558" rx="38" ry="6" fill="rgba(0,0,0,0.72)" />
+        <ellipse cx="81" cy="566" rx="62" ry="9" fill="rgba(0,0,0,0.42)" />
+        <ellipse cx="1019" cy="566" rx="62" ry="9" fill="rgba(0,0,0,0.42)" />
 
         <path
-          d="M 60 545 L 60 82 Q 60 60 82 60 L 1018 60 Q 1040 60 1040 82 L 1040 545 L 1008 545 L 1008 82 L 92 82 L 92 545 Z"
+          d="M 60 560 L 60 82 Q 60 60 82 60 L 1018 60 Q 1040 60 1040 82 L 1040 560 L 1008 560 L 1008 82 L 92 82 L 92 560 Z"
           fill="#262d3a"
         />
         <path
           d="M 70 82 L 70 71 Q 70 60 81 60 L 1019 60 Q 1030 60 1030 71 L 1030 82 L 1008 82 L 1008 71 L 92 71 L 92 82 Z"
           fill="url(#barG)"
         />
-        <path d="M 70 71 Q 70 60 81 60 L 92 60 L 92 545 L 70 545 Z" fill="url(#postG)" />
-        <path d="M 1008 60 L 1019 60 Q 1030 60 1030 71 L 1030 545 L 1008 545 Z" fill="url(#postG)" />
+        <path d="M 70 71 Q 70 60 81 60 L 92 60 L 92 560 L 70 560 Z" fill="url(#postG)" />
+        <path d="M 1008 60 L 1019 60 Q 1030 60 1030 71 L 1030 560 L 1008 560 Z" fill="url(#postG)" />
 
         <path d="M 78 63 L 1022 63 L 1022 66 L 78 66 Z" fill="rgba(255,255,255,0.85)" opacity="0.65" />
-        <rect x="76" y="71" width="3" height="474" fill="url(#postHL)" />
-        <rect x="1019" y="71" width="3" height="474" fill="url(#postHL)" opacity="0.9" />
+        <rect x="76" y="71" width="3" height="489" fill="url(#postHL)" />
+        <rect x="1019" y="71" width="3" height="489" fill="url(#postHL)" opacity="0.9" />
 
         <path
           d="M 92 82 L 1008 82 L 1008 540 M 92 540 L 92 82"
@@ -290,6 +298,10 @@ export default function GoalFrame({ children }: { children: ReactNode }) {
           fill="none"
         />
       </svg>
+
+      {/* scrim: oscurece la zona izquierda (donde va el texto) para legibilidad.
+          Degrada a transparente antes del emblema. */}
+      <div className="goal-scrim" aria-hidden />
 
       {/* contenido del hero, posicionado dentro de la boca del arco */}
       <div className="goal-content">{children}</div>

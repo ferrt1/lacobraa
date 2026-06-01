@@ -366,13 +366,15 @@ img{ display:block; max-width:100%; }
    ═══════════════════════════════════════════════════════════════ */
 .countdown{
   position:relative; z-index:3;
-  margin-top:-30px;
+  /* antes -30 (solapaba el hero y tapaba los CTAs). Ahora el campo es continuo,
+     así que lo bajo para que los botones se vean apoyados sobre el pasto. */
+  margin-top:14px;
 }
 .cd-card{
   max-width:var(--maxw); margin:0 auto;
   background:var(--panel); border:1px solid var(--border);
   border-radius:var(--r-lg);
-  padding:26px 30px;
+  padding:16px 24px;
   display:flex; align-items:center; gap:28px; flex-wrap:wrap;
   justify-content:space-between;
 }
@@ -383,15 +385,15 @@ img{ display:block; max-width:100%; }
   color:var(--text-bright); margin:0; letter-spacing:-.2px;
 }
 .cd-title b{ color:var(--celeste); }
-.cd-units{ display:flex; gap:12px; }
+.cd-units{ display:flex; gap:9px; }
 .cd-unit{
-  min-width:78px; text-align:center;
+  min-width:60px; text-align:center;
   background:var(--panel-2); border:1px solid var(--border);
-  border-radius:var(--r); padding:14px 10px 11px;
+  border-radius:var(--r); padding:9px 9px 7px;
 }
 .cd-num{
   font-family:var(--font-display);
-  font-size:42px; line-height:1; color:var(--white);
+  font-size:30px; line-height:1; color:var(--white);
   font-variant-numeric:tabular-nums;
 }
 .cd-unit.sec .cd-num{ color:var(--celeste); }
@@ -742,10 +744,25 @@ section{ position:relative; }
    Reusa: --font-display, --celeste, --text-bright, --border-light, etc.
    ═══════════════════════════════════════════════════════════════ */
 
+/* zona campo: contiene banderines + hero + countdown con UN fondo continuo.
+   Recorta el pasto (que escapa del hero) un poco DESPUÉS del countdown
+   (el padding-bottom deja ese aire de pasto bajo la tarjeta del tiempo). */
+.fieldzone{
+  position:relative; overflow:hidden;
+  /* llena lo que queda de pantalla bajo el nav → el pasto llega hasta abajo,
+     sin franja azul. Si sobra, ese resto es pasto bajo el countdown. */
+  min-height: calc(100vh - var(--nav-h));
+  padding-bottom:16px;
+}
+
 /* ── Hero en modo arco — paddings y dimensiones ───────────────── */
 .hero.hv-goal{
-  padding:38px 24px 64px;
+  /* sube 56px para meterse bajo los banderines (el fondo del hero cubre esa
+     franja); el padding-top compensa para que el texto no quede tapado */
+  margin-top:-56px;
+  padding:52px 24px 14px;
   min-height:auto;
+  overflow:visible;   /* el pasto debe poder salir del hero hacia el countdown */
 }
 .hero.hv-goal .hero-inner{
   /* el grid lo maneja .goal-content, no .hero-inner */
@@ -763,15 +780,89 @@ section{ position:relative; }
 .hero-spot.l{ left:8%;  transform:rotate(-10deg); transform-origin:top center; }
 .hero-spot.r{ right:8%; transform:rotate(10deg);  transform-origin:top center; }
 
+/* ── Cielo nocturno: estrellas titilando ──────────────────────── */
+.sky-stars{
+  position:absolute; inset:0; z-index:0; pointer-events:none;
+  /* sólo en el cielo: se desvanecen antes de llegar al pasto */
+  -webkit-mask-image:linear-gradient(180deg, #000 0%, #000 48%, transparent 76%);
+          mask-image:linear-gradient(180deg, #000 0%, #000 48%, transparent 76%);
+}
+.sky-star{
+  position:absolute; border-radius:50%;
+  background:#fff; opacity:var(--op, 0.6);
+  box-shadow:0 0 4px rgba(255,255,255,0.65);
+  animation-name:twinkle; animation-timing-function:ease-in-out; animation-iteration-count:infinite;
+}
+@keyframes twinkle{
+  0%,100%{ opacity:var(--op, 0.6); transform:scale(1); }
+  50%    { opacity:calc(var(--op, 0.6) * 0.28); transform:scale(0.7); }
+}
+
+/* ── Reflector apuntando al arco (cono de luz cenital) ────────── */
+.hero-beam{
+  position:absolute; top:-6%; left:50%; transform:translateX(-50%);
+  width:62%; height:88%;
+  z-index:1; pointer-events:none; filter:blur(16px);
+  background:linear-gradient(180deg,
+    rgba(116,205,246,0.22), rgba(116,205,246,0.07) 52%, transparent 80%);
+  clip-path:polygon(43% 0, 57% 0, 100% 100%, 0 100%);
+}
+
 /* ── Arco — contenedor + SVG ──────────────────────────────────── */
 .goal{
   position:relative; z-index:2;
-  width:min(1080px, 96%); margin:0 auto;
+  /* ancho = el menor entre: el contenedor, el ancho de página (--maxw),
+     y el ancho que deja una altura tope (para que TODO entre en una pantalla
+     sin scroll). 1.7742 = 1100/620 (proporción del arco).
+     320px = nav + botones + countdown + paddings reservados. */
+  width: min(100%, calc(var(--maxw) - 48px), calc((100vh - 320px) * 1.7742));
+  margin:0 auto;
   aspect-ratio: 1100 / 620;
 }
 .goal-svg{
   position:absolute; inset:0; width:100%; height:100%;
+  z-index:1;
   filter: drop-shadow(0 30px 50px rgba(0,0,0,0.55));
+}
+
+/* Piso full-bleed — el pasto sale de la caja del arco y llega a los bordes.
+   top en % del viewBox = siempre alineado a la línea de cal (y=540/620),
+   sin importar el ancho. width:100vw centrado = full-bleed.
+   bottom negativo para cubrir el padding inferior del hero. */
+.goal-floor{
+  position:absolute; z-index:0;
+  top: calc(540 / 620 * 100%);
+  left:50%; transform:translateX(-50%);
+  /* bottom muy por debajo: el hero (overflow:hidden) recorta justo en su borde,
+     así el pasto siempre toca el bottom:0 del hero sin gap oscuro */
+  width:100vw; bottom:-50vh;
+  /* rayas de cancha cortada (sutiles) sobre el degradado de pasto */
+  background:
+    repeating-linear-gradient(180deg, rgba(255,255,255,0.028) 0 24px, rgba(0,0,0,0.03) 24px 48px),
+    linear-gradient(180deg, #173220 0%, #0c1f13 58%, #050f08 100%);
+  /* sombra interior arriba: difumina el borde del pasto con el fondo (menos "corte") */
+  box-shadow: inset 0 16px 26px -12px rgba(0,0,0,0.65);
+}
+.goal-floor::before{ /* línea de cal: nítida en el centro, se desvanece a los lados */
+  content:""; position:absolute; top:0; left:0; right:0; height:3px;
+  background:linear-gradient(90deg,
+    transparent 0%, rgba(255,255,255,0.5) 18%, rgba(255,255,255,0.5) 82%, transparent 100%);
+}
+
+/* Scrim — capa oscura degradada detrás del texto (izquierda).
+   Fade a transparente ~62% para no apagar el emblema de la derecha. */
+.goal-scrim{
+  position:absolute; z-index:2; pointer-events:none;
+  /* arranca DENTRO de la boca (después del poste izquierdo, x=92) para no mancharlo */
+  left: calc(96 / 1100 * 100%);
+  right: calc(96 / 1100 * 100%);
+  top: calc(82 / 620 * 100%);
+  bottom: calc(82 / 620 * 100%);
+  background:linear-gradient(90deg,
+    rgba(2,5,12,0.92) 0%,
+    rgba(2,5,12,0.70) 26%,
+    rgba(2,5,12,0.28) 46%,
+    rgba(2,5,12,0)    62%);
 }
 
 /* Contenido adentro de la boca del arco.
@@ -783,13 +874,19 @@ section{ position:relative; }
   top:   calc(92 / 620 * 100%);
   bottom:calc(90 / 620 * 100%);
   z-index:3;
-  display:grid; grid-template-columns:1.05fr 0.95fr; gap:24px; align-items:center;
-  padding:18px 32px 8px;
+  display:grid; grid-template-columns:1.05fr 0.95fr; gap:24px; align-items:start;
+  padding:4px 32px 8px;
 }
+/* texto y copa pegados arriba de la boca */
+.hv-goal .goal-content .hero-copy{ align-self:start; padding-top:0; }
+/* ritmo vertical más compacto dentro del arco → los CTAs no se solapan con el countdown */
+.hv-goal .hero-eyebrow{ margin-bottom:12px; }
+.hv-goal .hero-sub{ margin-top:14px; }
+.hv-goal .hero-cta{ margin-top:18px; }
 
 /* ── Tipografía en modo arco — sombras para legibilidad sobre red ── */
 .hv-goal .hero-eyebrow .txt{ color:var(--text-bright); text-shadow:0 2px 8px rgba(0,0,0,0.6); }
-.hv-goal h1{ text-shadow:0 4px 24px rgba(0,0,0,0.65); }
+.hv-goal h1{ text-shadow:0 4px 24px rgba(0,0,0,0.65); font-size:clamp(40px, 5.4vw, 72px); }
 .hv-goal h1 .accent{ text-shadow:0 4px 24px rgba(0,0,0,0.65), 0 0 30px rgba(79,184,232,0.35); }
 .hv-goal h1 .stroke{ text-shadow:none; }
 .hv-goal .hero-sub{ color:var(--text-bright); text-shadow:0 2px 10px rgba(0,0,0,0.65); }
@@ -802,11 +899,11 @@ section{ position:relative; }
 }
 
 /* Halo detrás del emblema (suave glow celeste) */
-.hv-goal .hero-media{ min-height:280px; }
+.hv-goal .hero-media{ min-height:0; align-self:start; }
 .hv-goal .emblem.big{
   width:min(290px, 86%);
   filter:drop-shadow(0 24px 50px rgba(0,0,0,0.7));
-  transform:translateY(-32px);
+  transform:translateY(-4px);
 }
 .emblem-halo{
   position:absolute; width:78%; aspect-ratio:1; border-radius:50%;
@@ -814,20 +911,29 @@ section{ position:relative; }
   filter:blur(25px); z-index:1;
 }
 
-/* ── Responsive — colapsa a una columna ──────────────────────── */
+/* ── Responsive — mobile: sin marco SVG (se distorsiona en chico),
+      contenido apilado y centrado sobre el campo ──────────────── */
 @media (max-width: 860px){
-  .goal{ aspect-ratio: 5 / 6; }
+  .hero.hv-goal{ padding:80px 16px 24px; }
+  /* el arco deja de tener proporción fija y de toparse por altura */
+  .goal{ width:100%; max-width:480px; aspect-ratio:auto; }
+  .goal-svg, .goal-scrim{ display:none; }   /* el marco solo en desktop */
+
   .goal-content{
-    grid-template-columns:1fr;
-    text-align:center;
-    padding:8px 14px;
+    position:static;                          /* fluye normal, ya no encajado en la boca */
+    grid-template-columns:1fr; text-align:center;
+    gap:6px; padding:0;
   }
-  .hv-goal .hero-media{ order:-1; min-height:0; }
-  .hv-goal .emblem.big{ width:160px; }
-  .hv-goal .hero-eyebrow,
-  .hv-goal .hero-cta{ justify-content:center; }
-  .hv-goal .hero-sub{ margin-left:auto; margin-right:auto; font-size:14px; }
+  .hv-goal .goal-content .hero-copy{ align-items:center; padding-top:0; }
+  .hv-goal .hero-media{ order:-1; align-self:center; }
+  .hv-goal .emblem.big{ width:168px; transform:none; }
+  .hv-goal .hero-eyebrow{ justify-content:center; margin-bottom:6px; }
+  .hv-goal .hero-sub{ margin:10px auto 0; font-size:14px; }
   .hv-goal h1{ font-size:38px; }
+
+  /* botones apilados full-width */
+  .hv-goal .hero-cta{ flex-direction:column; align-items:stretch; gap:10px; margin-top:18px; }
+  .hv-goal .hero-cta .btn{ justify-content:center; }
 }
 
 /* ═══════════════════════════════════════════════════════════════

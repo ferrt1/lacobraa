@@ -8,9 +8,13 @@ import Footer from "@/components/Footer";
 export default function Home() {
   return (
     <>
-      <Bunting intensity={1} />
-      <Hero />
-      <Countdown />
+      {/* zona "campo": un solo fondo (anillos arriba + pasto abajo) detrás de
+          banderines, arco y countdown — sin franjas azules entremedio */}
+      <div className="fieldzone">
+        <Bunting intensity={1} />
+        <Hero />
+        <Countdown />
+      </div>
       <ActionCards />
       <Stats />
       <Footer />

@@ -42,16 +42,31 @@ Mirá la **home** (`src/app/page.tsx` + componentes en `src/components/`) como r
 
 - ✅ **Home** completa (Nav, Bunting, Hero, Countdown, ActionCards, Stats, Footer).
 - ✅ Sistema de diseño en `globals.css`. Nav persiste desde `src/app/layout.tsx`.
-- ⏳ Páginas internas (predicciones, sorteos, ranking) pendientes.
+- ✅ **Fixture** lo hiciste vos (gracias 🙌). Quedó funcional.
+- ✅ **Hero rediseñado a fondo** — ahora es una escena de **estadio de noche con un arco de fútbol**
+  (ver sección de abajo). Entra todo en una pantalla, fondo continuo, mobile contemplado.
+- 🔜 **Fer arranca `/album`** (solo diseño). **No lo toques** — es la página de Fer.
+- ⏳ Pendientes: predicciones, sorteos, ranking, perfil.
 
-## TU TAREA, Nahu 👉 la página **Fixture** (`src/app/fixture/page.tsx`)
+## ⚠️ Hero / "el campo" — arquitectura (NO lo rompas, Nahu)
 
-- La ruta ya existe con un esqueleto y comentarios. Hereda el Nav del layout.
-- Idea: selector de fase (Grupos / 16avos / … / Final), 12 grupos (A–L) con tabla, partidos por fecha,
-  llave de eliminatorias, y botón "Predecí" que linkee a `/predicciones`.
-- **Datos**: mock plausibles del Mundial 2026 (48 equipos, 11 jun – 19 jul). Ponelos en un archivo de
-  datos, no hardcodeados en el JSX.
-- Usá las clases del DS (mirá arriba). Banderas con `<Flag code="..."/>` de `ui.tsx`.
+Esto es lo más delicado de la home. Si tocás la home, **no metas mano acá sin avisar**:
+
+- **`src/app/page.tsx`** envuelve `Bunting + Hero + Countdown` en un **`.fieldzone`**: un solo fondo
+  continuo (cielo estrellado arriba → pasto abajo), sin franjas. `min-height: calc(100vh - nav)` →
+  ocupa toda la pantalla.
+- **`src/components/Hero.tsx`**: fondo de **estrellas** (generadas con PRNG determinista — no usar
+  `Math.random` directo o rompe la hidratación de Next) + **reflector** (`.hero-beam`, cono de luz al
+  arco). El hero sube con `margin-top:-56px` para meterse bajo los banderines.
+- **`src/components/GoalFrame.tsx`**: el **arco SVG** (marco, red en perspectiva, postes plantados).
+  La red se genera por JS en un `useEffect`; las grillas de techo/costados/fondo/piso están **alineadas**
+  entre sí (no las desalinees). El **pasto** (`.goal-floor`) es full-bleed y sale del arco.
+- El contenido (texto + copa) va **dentro de la boca** del arco vía `.goal-content` (absoluto, en
+  coords del viewBox). En **mobile** el marco SVG se oculta y el contenido se apila (ver media query).
+- Tamaño del arco topeado por altura (`100vh - 320px`) para que **todo entre sin scroll**.
+
+Regla de diseño que costó: **restricción**. Nada de confeti/papelitos/glows de más — Fer rechazó 2
+versiones por "muy IA". Lo festivo lo dan los banderines y nada más.
 
 ## Reglas
 
@@ -63,6 +78,8 @@ Mirá la **home** (`src/app/page.tsx` + componentes en `src/components/`) como r
 
 ## 👉 Acción para vos ahora
 
-1. Leé este archivo.
-2. **Creá `docs/claude-nahu.md`** (hay un template ahí) y anotá en qué vas a arrancar.
-3. Empezá por `/fixture`. Cuando avances o necesites algo de Fer, escribilo en `claude-nahu.md`.
+1. Leé este archivo (sobre todo la sección del **Hero/campo** — no lo rompas).
+2. **Fer está en `/album` (solo diseño) — no la toques.**
+3. Si seguís con otra página interna, avisá en `claude-nahu.md` cuál agarrás para no pisarnos.
+4. Reusá el sistema de diseño de `globals.css`. Cualquier cambio a la **home** o a `globals.css`,
+   coordiná primero (ese archivo lo compartimos).

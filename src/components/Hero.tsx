@@ -55,8 +55,14 @@ export default function Hero() {
         <div className="hero-vignette" />
       </div>
 
-      {/* reflector apuntando al arco (cono de luz cenital) */}
-      <div className="hero-beam" aria-hidden />
+      {/* reflectores de estadio — múltiples haces */}
+      <div className="hero-beams-wrap" aria-hidden>
+        <div className="hero-beam hero-beam-main" />
+        <div className="hero-beam hero-beam-l" />
+        <div className="hero-beam hero-beam-r" />
+        <div className="hero-beam-flare" />
+        <div className="hero-beam-flare hero-beam-flare-2" />
+      </div>
 
       <GoalFrame>
         <div className="hero-copy">

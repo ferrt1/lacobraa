@@ -798,14 +798,71 @@ section{ position:relative; }
   50%    { opacity:calc(var(--op, 0.6) * 0.28); transform:scale(0.7); }
 }
 
-/* ── Reflector apuntando al arco (cono de luz cenital) ────────── */
+/* ── Reflectores de estadio — haces cálidos por delante del arco ── */
+.hero-beams-wrap{
+  position:absolute; inset:0;
+  z-index:4; /* delante del arco (z-index:1-2) → ilumina texto y marco */
+  pointer-events:none; overflow:hidden;
+  mix-blend-mode:screen;
+}
 .hero-beam{
-  position:absolute; top:-6%; left:50%; transform:translateX(-50%);
-  width:62%; height:88%;
-  z-index:1; pointer-events:none; filter:blur(16px);
-  background:linear-gradient(180deg,
-    rgba(116,205,246,0.22), rgba(116,205,246,0.07) 52%, transparent 80%);
-  clip-path:polygon(43% 0, 57% 0, 100% 100%, 0 100%);
+  position:absolute; top:-10%;
+  pointer-events:none;
+}
+/* haz principal — cono ancho, cálido */
+.hero-beam-main{
+  left:50%; transform:translateX(-50%);
+  width:60%; height:100%;
+  background:radial-gradient(ellipse 50% 80% at 50% 0%,
+    rgba(255,240,200,0.22) 0%,
+    rgba(255,220,160,0.10) 25%,
+    rgba(255,200,120,0.04) 50%,
+    transparent 75%);
+  filter:blur(14px);
+}
+/* haz izquierdo — más sutil, ángulo */
+.hero-beam-l{
+  left:32%; transform:translateX(-50%) rotate(-6deg);
+  transform-origin:top center;
+  width:30%; height:95%;
+  background:radial-gradient(ellipse 55% 75% at 50% 0%,
+    rgba(255,235,180,0.12) 0%,
+    rgba(255,210,140,0.04) 40%,
+    transparent 70%);
+  filter:blur(18px);
+}
+/* haz derecho */
+.hero-beam-r{
+  left:68%; transform:translateX(-50%) rotate(6deg);
+  transform-origin:top center;
+  width:30%; height:95%;
+  background:radial-gradient(ellipse 55% 75% at 50% 0%,
+    rgba(255,235,180,0.10) 0%,
+    rgba(255,210,140,0.03) 40%,
+    transparent 70%);
+  filter:blur(18px);
+}
+
+/* flare — destello del foco en la fuente de luz */
+.hero-beam-flare{
+  position:absolute; z-index:2; pointer-events:none;
+  top:-3%; left:50%; transform:translateX(-50%);
+  width:100px; height:100px;
+  background:radial-gradient(circle,
+    rgba(255,250,230,0.45) 0%,
+    rgba(255,230,180,0.18) 30%,
+    transparent 60%);
+  border-radius:50%;
+  filter:blur(4px);
+}
+.hero-beam-flare-2{
+  width:260px; height:50px;
+  border-radius:50%;
+  background:radial-gradient(ellipse,
+    rgba(255,240,200,0.14) 0%,
+    transparent 65%);
+  filter:blur(12px);
+  top:-1.5%;
 }
 
 /* ── Arco — contenedor + SVG ──────────────────────────────────── */

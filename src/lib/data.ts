@@ -90,3 +90,43 @@ export const BANDERINES: Banderin[] = [
 ];
 
 export const SPONSOR_OFICIAL = "Tu sponsor acá";
+
+// ── SORTEOS (mock) ─────────────────────────────────────────────────────────
+// 40 PlayStation 5, una por cada día del Mundial. Se participa escribiendo la
+// palabra clave en el chat de Kick. Datos de ejemplo para mostrar la experiencia.
+export const SORTEOS = {
+  palabra: "COBRA11",
+  premio: "PlayStation 5",
+  sorteadas: 6,
+  total: 40,
+  pasos: [
+    { n: "01", t: "Mirá el stream", d: "Entrá al directo de La Cobra en Kick durante el Mundial." },
+    { n: "02", t: "Escribí la palabra", d: "Cuando La Cobra la tira al aire, mandala en el chat antes de que cierre." },
+    { n: "03", t: "Esperá el sorteo", d: "Se elige un ganador al azar entre los que participaron. Una PS5 por día." },
+  ],
+  ganadores: [
+    { dia: "06", fecha: "16 JUN", user: "@valen.gzz" },
+    { dia: "05", fecha: "15 JUN", user: "@thiagokun10" },
+    { dia: "04", fecha: "14 JUN", user: "@morena_ok" },
+    { dia: "03", fecha: "13 JUN", user: "@elruso_77" },
+    { dia: "02", fecha: "12 JUN", user: "@juli.perez" },
+    { dia: "01", fecha: "11 JUN", user: "@bruno.dev" },
+  ],
+} as const;
+
+// ── RANKING (mock) ─────────────────────────────────────────────────────────
+// Leaderboard de la comunidad: puntos por aciertos en predicciones.
+export const RANKING = [
+  { pos: 1, user: "@thiagokun10", pts: 4820, aciertos: "38/52", racha: 7 },
+  { pos: 2, user: "@valen.gzz", pts: 4655, aciertos: "36/52", racha: 4 },
+  { pos: 3, user: "@elruso_77", pts: 4490, aciertos: "35/52", racha: 5 },
+  { pos: 4, user: "@morena_ok", pts: 4210, aciertos: "33/52", racha: 2 },
+  { pos: 5, user: "@juli.perez", pts: 4085, aciertos: "32/52", racha: 3 },
+  { pos: 6, user: "@bruno.dev", pts: 3940, aciertos: "31/52", racha: 1 },
+  { pos: 7, user: "@laica.7", pts: 3810, aciertos: "30/52", racha: 6 },
+  { pos: 8, user: "@nico_arg", pts: 3675, aciertos: "29/52", racha: 0 },
+  { pos: 9, user: "@flor.mdq", pts: 3540, aciertos: "28/52", racha: 2 },
+  { pos: 10, user: "@santi.gg", pts: 3420, aciertos: "27/52", racha: 1 },
+  { pos: 11, user: "@dami_10", pts: 3290, aciertos: "26/52", racha: 0 },
+  { pos: 12, user: "@cami.ok", pts: 3150, aciertos: "25/52", racha: 3 },
+] as const;

@@ -49,7 +49,16 @@ Mirá la **home** (`src/app/page.tsx` + componentes en `src/components/`) como r
   con logo de la selección (izq) + grilla de convocados (der), guarda de arcos, **estación de packs**
   (apertura de a una), buscador y modal de jugador. Archivos PROPIOS, no tocan `globals.css`:
   `src/app/album/{page.tsx,AlbumClient.tsx,album.css}` + `src/lib/album-data.ts`. Sin fotos (licenciadas) → figuritas estilizadas.
-- ⏳ Pendientes: predicciones, sorteos, ranking, perfil.
+- ✅ **`/sorteos` y `/ranking` hechos (de Fer)** — páginas reales con mock (no más links a `#`).
+  Mock nuevo en `src/lib/data.ts` (`SORTEOS`, `RANKING`). CSS propio scoped: `src/app/{sorteos,ranking}/*.css`
+  (no tocan `globals.css`). Reusan primitivas del DS (`.section`, `.wrap`, `.section-head`, `.ps-bar`).
+- ✅ **Nav arreglado** (`src/components/Nav.tsx`): ahora usa `<Link>` de Next + estado activo por ruta
+  (`usePathname`). Links reales: Inicio `/`, Fixture `/fixture`, Sorteos `/sorteos`, Álbum `/album`,
+  Ranking `/ranking`. (Antes "Predicciones" y todo iba a `#`.)
+- ⏳ Pendientes: predicciones, perfil.
+
+> ⚠️ **Nahu**: en `/fixture` tenés un botón "Predecí los partidos" → `/predicciones`, que **todavía no
+> existe** (da 404). Cuando puedas, apuntalo a algo que exista o dejalo deshabilitado hasta que esté.
 
 ## ⚠️ Hero / "el campo" — arquitectura (NO lo rompas, Nahu)
 

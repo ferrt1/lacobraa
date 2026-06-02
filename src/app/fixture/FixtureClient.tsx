@@ -70,48 +70,53 @@ function GroupPage({ group }: { group: Group }) {
         <span className="pf-page-sub">FASE DE GRUPOS · FIFA 2026</span>
       </div>
 
-      <div className="pf-standings">
-        <div className="pf-st-header">
-          <span className="pf-st-pos">#</span>
-          <span className="pf-st-team-h">EQUIPO</span>
-          <span>PJ</span><span>PG</span><span>PE</span><span>PP</span>
-          <span>GF</span><span>GC</span><span className="pf-st-pts-h">PTS</span>
+      <div className="pf-group-layout">
+        <div className="pf-group-left">
+          <div className="pf-page-section-label">POSICIONES</div>
+          <div className="pf-standings">
+            <div className="pf-st-header">
+              <span className="pf-st-pos">#</span>
+              <span className="pf-st-team-h">EQUIPO</span>
+              <span>PJ</span><span>PG</span><span>PE</span><span>PP</span>
+              <span>GF</span><span>GC</span><span className="pf-st-pts-h">PTS</span>
+            </div>
+            {group.standings.map((s, i) => (
+              <div key={s.code} className={`pf-st-row${i < 2 ? " qualified" : ""}`}>
+                <span className="pf-st-pos">{i + 1}</span>
+                <span className="pf-st-team">
+                  <MiniFlag code={s.code} />
+                  {shortName(s.code)}
+                </span>
+                <span>{s.pj}</span><span>{s.pg}</span><span>{s.pe}</span><span>{s.pp}</span>
+                <span>{s.gf}</span><span>{s.gc}</span>
+                <span className="pf-st-pts">{s.pts}</span>
+              </div>
+            ))}
+          </div>
         </div>
-        {group.standings.map((s, i) => (
-          <div key={s.code} className={`pf-st-row${i < 2 ? " qualified" : ""}`}>
-            <span className="pf-st-pos">{i + 1}</span>
-            <span className="pf-st-team">
-              <MiniFlag code={s.code} />
-              {shortName(s.code)}
-            </span>
-            <span>{s.pj}</span><span>{s.pg}</span><span>{s.pe}</span><span>{s.pp}</span>
-            <span>{s.gf}</span><span>{s.gc}</span>
-            <span className="pf-st-pts">{s.pts}</span>
-          </div>
-        ))}
-      </div>
 
-      <div className="pf-page-divider" />
-      <div className="pf-page-section-label">PARTIDOS</div>
-
-      <div className="pf-matches-list">
-        {group.matches.map((m, i) => (
-          <div key={i} className="pf-m">
-            <span className="pf-m-date">{m.date}<br /><b>{m.time}</b></span>
-            <div className="pf-m-home">
-              <span>{shortName(m.home)}</span>
-              <MiniFlag code={m.home} size="sm" />
-            </div>
-            <div className="pf-m-score">
-              {m.scoreH != null ? `${m.scoreH} - ${m.scoreA}` : "vs"}
-            </div>
-            <div className="pf-m-away">
-              <MiniFlag code={m.away} size="sm" />
-              <span>{shortName(m.away)}</span>
-            </div>
-            <span className="pf-m-city">{m.city}</span>
+        <div className="pf-group-right">
+          <div className="pf-page-section-label">PARTIDOS</div>
+          <div className="pf-matches-list">
+            {group.matches.map((m, i) => (
+              <div key={i} className="pf-m">
+                <span className="pf-m-date">{m.date}<br /><b>{m.time}</b></span>
+                <div className="pf-m-home">
+                  <span>{shortName(m.home)}</span>
+                  <MiniFlag code={m.home} size="sm" />
+                </div>
+                <div className="pf-m-score">
+                  {m.scoreH != null ? `${m.scoreH} - ${m.scoreA}` : "vs"}
+                </div>
+                <div className="pf-m-away">
+                  <MiniFlag code={m.away} size="sm" />
+                  <span>{shortName(m.away)}</span>
+                </div>
+                <span className="pf-m-city">{m.city}</span>
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
       </div>
     </div>
   );
@@ -120,6 +125,7 @@ function GroupPage({ group }: { group: Group }) {
 function KOPage({ round, label }: { round: string; label: string }) {
   const matches = KNOCKOUT.filter(m => m.round === round);
   const few = matches.length <= 4;
+  const many = matches.length > 4;
   return (
     <div className={`pf-page-inner${few ? " pf-page-centered" : ""}`}>
       <div className="pf-page-top">
@@ -127,7 +133,7 @@ function KOPage({ round, label }: { round: string; label: string }) {
         <span className="pf-page-sub">ELIMINATORIAS · FIFA 2026</span>
       </div>
 
-      <div className="pf-ko-list">
+      <div className={`pf-ko-list${many ? " pf-ko-many" : ""}`}>
         {matches.map(m => (
           <div key={m.id} className="pf-ko-card">
             <div className="pf-ko-row">

@@ -1,5 +1,4 @@
 import type { CSSProperties } from "react";
-import { I } from "./ui";
 import GoalFrame from "./GoalFrame";
 
 const EMBLEM = "/emblema-26.png";
@@ -78,10 +77,6 @@ export default function Hero() {
             Predicciones en vivo, <b>40 PlayStations</b> en sorteo y el fixture de los 48.
             Metele al Mundial con la banda — y que el chat lo decida.
           </p>
-          <div className="hero-cta">
-            <a href="#" className="btn btn-primary"><I.bolt /> Sumate a la banda</a>
-            <a href="#" className="btn btn-lg-ghost"><I.kick /> Conectar con Kick</a>
-          </div>
         </div>
         <div className="hero-media">
           <div className="emblem-halo" aria-hidden />

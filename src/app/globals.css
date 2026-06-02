@@ -977,16 +977,13 @@ section{ position:relative; }
 /* ── Arco — contenedor + SVG ──────────────────────────────────── */
 .goal{
   position:relative; z-index:2;
-  /* El ANCHO lo limita el contenedor; la ALTURA la define el contenido.
-     La red SVG usa preserveAspectRatio="none" → se estira a la caja sin
-     distorsión fea, así que dejamos que el contenido empuje la altura.
-     Antes la caja tenía aspect-ratio fijo y el contenido (absoluto) se
-     desbordaba por abajo → los CTAs quedaban tapados por el countdown. */
-  width: min(100%, calc(var(--maxw) - 48px));
+  /* ancho = el menor entre: el contenedor, el ancho de página (--maxw),
+     y el ancho que deja una altura tope (para que TODO entre en una pantalla
+     sin scroll). 1.7742 = 1100/620 (proporción del arco).
+     320px = nav + botones + countdown + paddings reservados. */
+  width: min(100%, calc(var(--maxw) - 48px), calc((100vh - 320px) * 1.7742));
   margin:0 auto;
-  /* proporción "linda" de arco en pantallas altas; si el contenido necesita
-     más alto, la caja crece y la red se estira con él (sin solape). */
-  min-height: min(58vh, 600px);
+  aspect-ratio: 1100 / 620;
 }
 .goal-svg{
   position:absolute; inset:0; width:100%; height:100%;
@@ -1037,14 +1034,14 @@ section{ position:relative; }
 /* Contenido adentro de la boca del arco.
    Coordenadas: viewBox 1100x620, inner box x=92..1008, y=82..540 */
 .goal-content{
-  /* en flujo → define la altura de .goal (el SVG va detrás, absoluto) */
-  position:relative;
+  position:absolute;
+  left:  calc(92 / 1100 * 100%);
+  right: calc(92 / 1100 * 100%);
+  top:   calc(92 / 620 * 100%);
+  bottom:calc(90 / 620 * 100%);
   z-index:3;
   display:grid; grid-template-columns:1.05fr 0.95fr; gap:24px; align-items:start;
-  /* padding = grosor del marco del arco para que el contenido quede DENTRO de
-     la boca: laterales ≈ postes (8.4%), arriba/abajo ≈ travesaño/base (en vh
-     para acompañar el estirado de la red). */
-  padding: clamp(40px, 8vh, 88px) 8.4% clamp(36px, 7vh, 78px);
+  padding:4px 32px 8px;
 }
 /* texto y copa pegados arriba de la boca */
 .hv-goal .goal-content .hero-copy{ align-self:start; padding-top:0; }
@@ -1084,7 +1081,7 @@ section{ position:relative; }
       contenido apilado y centrado sobre el campo ──────────────── */
 @media (max-width: 980px){
   .hero.hv-goal{ padding:80px 16px 24px; }
-  .goal{ width:100%; max-width:480px; min-height:0; }
+  .goal{ width:100%; max-width:480px; aspect-ratio:auto; }
   .goal-svg, .goal-scrim{ display:none; }
   .hero-beams-wrap{ z-index:0; }
 

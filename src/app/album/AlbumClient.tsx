@@ -9,7 +9,7 @@
    Front only, datos mock. Sin fotos (licenciadas).
    ═══════════════════════════════════════════════════════════════ */
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { FLAGS } from "@/components/ui";
 import { SQUADS, COMING_SOON, ALL_FIGUS, initialOwned } from "@/lib/album-data";
@@ -29,7 +29,7 @@ type PanelSpec =
   | { type: "empty" }
   | { type: "cover" }
   | { type: "team"; squad: Squad }
-  | { type: "grid"; squad: Squad };
+  | { type: "grid"; squad: Squad; slice?: [number, number]; part?: string };
 type Spread = { left: PanelSpec; right: PanelSpec; label: string; code?: string };
 
 function buildSpreads(): Spread[] {
@@ -111,12 +111,13 @@ function TeamPanel({ squad, owned }: { squad: Squad; owned: Record<string, boole
 }
 
 /* ═══════════════ right page: grilla ═══════════════ */
-function SquadGrid({ squad, owned, onPick }: { squad: Squad; owned: Record<string, boolean>; onPick: (p: Player, code: string) => void }) {
+function SquadGrid({ squad, owned, onPick, slice, part }: { squad: Squad; owned: Record<string, boolean>; onPick: (p: Player, code: string) => void; slice?: [number, number]; part?: string }) {
+  const players = slice ? squad.players.slice(slice[0], slice[1]) : squad.players;
   return (
     <div className="alb-grid-page">
-      <div className="alb-grid-head"><h3>{squad.name}</h3><span className="alb-grid-sub">Convocados</span></div>
+      <div className="alb-grid-head"><h3>{squad.name}</h3><span className="alb-grid-sub">Convocados{part ? ` · ${part}` : ""}</span></div>
       <div className="alb-grid">
-        {squad.players.map((p) => {
+        {players.map((p) => {
           const key = `${squad.code}-${p.n}`;
           const fig: Figu = { key, code: squad.code, team: squad.name, n: p.n, name: p.name, pos: p.pos };
           const got = !!owned[key];
@@ -148,7 +149,7 @@ function Panel({ spec, owned, onPick }: { spec: PanelSpec; owned: Record<string,
     case "empty": return <div className="page-empty" />;
     case "cover": return <Cover />;
     case "team": return <TeamPanel squad={spec.squad} owned={owned} />;
-    case "grid": return <SquadGrid squad={spec.squad} owned={owned} onPick={onPick} />;
+    case "grid": return <SquadGrid squad={spec.squad} owned={owned} onPick={onPick} slice={spec.slice} part={spec.part} />;
   }
 }
 
@@ -160,9 +161,45 @@ function sampleN<T>(arr: T[], n: number): T[] {
 }
 function fmt(s: number) { return `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`; }
 
+/* detecta mobile (sin romper SSR: arranca en false y se actualiza tras montar) */
+function useIsMobile(bp = 760) {
+  const [m, setM] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia(`(max-width:${bp}px)`);
+    const on = () => setM(mq.matches);
+    on();
+    mq.addEventListener("change", on);
+    return () => mq.removeEventListener("change", on);
+  }, [bp]);
+  return m;
+}
+
+/* en mobile el libro se aplana: cada equipo son 3 páginas (panel + 2 mitades de
+   la grilla) para que el alto sea parejo y no crezca incómodo hacia abajo. */
+type FlatPage = { panel: PanelSpec; spread: number };
+function flattenSpreads(spreads: Spread[]): FlatPage[] {
+  const arr: FlatPage[] = [];
+  spreads.forEach((sp, i) => {
+    if (i === 0) { arr.push({ panel: sp.right, spread: i }); return; } // tapa
+    arr.push({ panel: sp.left, spread: i });   // panel de selección
+    if (sp.right.type === "grid") {
+      const squad = sp.right.squad;
+      const mid = Math.ceil(squad.players.length / 2);
+      arr.push({ panel: { type: "grid", squad, slice: [0, mid], part: "1 de 2" }, spread: i });
+      arr.push({ panel: { type: "grid", squad, slice: [mid, squad.players.length], part: "2 de 2" }, spread: i });
+    } else {
+      arr.push({ panel: sp.right, spread: i });
+    }
+  });
+  return arr;
+}
+
 /* ═══════════════════════════════════════════════════════════════ */
 export default function AlbumClient() {
   const SPREADS = useState(() => buildSpreads())[0];
+  const isMobile = useIsMobile();
+  const flat = useMemo(() => flattenSpreads(SPREADS), [SPREADS]);
+  const [mIdx, setMIdx] = useState(0); // índice de página plana (mobile)
   const [current, setCurrent] = useState(0);
   const [flip, setFlip] = useState<null | { dir: "forward" | "backward"; turning: boolean }>(null);
   const flipSnap = useRef<{ front: PanelSpec; back: PanelSpec } | null>(null);
@@ -201,8 +238,12 @@ export default function AlbumClient() {
     setCurrent((c) => (flip.dir === "forward" ? c + 1 : c - 1));
     setFlip(null); flipSnap.current = null;
   }
+  function mNext() { setMIdx((i) => Math.min(i + 1, flat.length - 1)); }
+  function mPrev() { setMIdx((i) => Math.max(i - 1, 0)); }
   function jumpTo(idx: number) {
-    if (flip || idx === current || idx < 0 || idx >= SPREADS.length) return;
+    if (idx < 0 || idx >= SPREADS.length) return;
+    if (isMobile) { const t = flat.findIndex((f) => f.spread === idx); setMIdx(t < 0 ? 0 : t); return; } // a la 1ª página de esa selección
+    if (flip || idx === current) return;
     if (Math.abs(idx - current) > 1) { setCurrent(idx); return; }
     if (idx > current) flipForward(); else flipBackward();
   }
@@ -212,12 +253,12 @@ export default function AlbumClient() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (player || pack) return;
-      if (e.key === "ArrowRight") flipForward();
-      if (e.key === "ArrowLeft") flipBackward();
+      if (e.key === "ArrowRight") { isMobile ? mNext() : flipForward(); }
+      if (e.key === "ArrowLeft") { isMobile ? mPrev() : flipBackward(); }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [flip, current, player, pack]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [flip, current, player, pack, isMobile, mIdx]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function openPack() {
     if (packs <= 0 || pack) return;
@@ -289,35 +330,58 @@ export default function AlbumClient() {
       {/* ── el libro ── */}
       <div className="fx-album">
         <div className="album-shell">
-          <div className="book">
-            <div className="page-stack">
-              <div className="page page-left"><Panel spec={leftPanel} owned={owned} onPick={(p, code) => setPlayer({ p, code })} />{pageArches(leftPanel.type)}</div>
-              <div className="page page-right"><Panel spec={rightPanel} owned={owned} onPick={(p, code) => setPlayer({ p, code })} />{pageArches(rightPanel.type)}</div>
-            </div>
-            {flip && flipSnap.current && (
-              <div
-                className={`flip-layer ${flip.dir === "forward" ? "from-right" : "from-left"}${flip.turning ? " turning" : ""}`}
-                onTransitionEnd={(e) => { if (e.target === e.currentTarget && e.propertyName === "transform") onFlipEnd(); }}
-              >
-                <div className="flip-face front"><Panel spec={flipSnap.current.front} owned={owned} onPick={(p, code) => setPlayer({ p, code })} />{pageArches(flipSnap.current.front.type)}</div>
-                <div className="flip-face back"><Panel spec={flipSnap.current.back} owned={owned} onPick={(p, code) => setPlayer({ p, code })} />{pageArches(flipSnap.current.back.type)}</div>
+          {isMobile ? (
+            /* MOBILE: una sola página por vez, sin animación, navegando con botones */
+            <div className="book mob-book">
+              <div className="page mob-page" key={mIdx}>
+                <Panel spec={flat[mIdx].panel} owned={owned} onPick={(p, code) => setPlayer({ p, code })} />
+                {pageArches(flat[mIdx].panel.type)}
               </div>
-            )}
+            </div>
+          ) : (
+            <div className="book">
+              <div className="page-stack">
+                <div className="page page-left"><Panel spec={leftPanel} owned={owned} onPick={(p, code) => setPlayer({ p, code })} />{pageArches(leftPanel.type)}</div>
+                <div className="page page-right"><Panel spec={rightPanel} owned={owned} onPick={(p, code) => setPlayer({ p, code })} />{pageArches(rightPanel.type)}</div>
+              </div>
+              {flip && flipSnap.current && (
+                <div
+                  className={`flip-layer ${flip.dir === "forward" ? "from-right" : "from-left"}${flip.turning ? " turning" : ""}`}
+                  onTransitionEnd={(e) => { if (e.target === e.currentTarget && e.propertyName === "transform") onFlipEnd(); }}
+                >
+                  <div className="flip-face front"><Panel spec={flipSnap.current.front} owned={owned} onPick={(p, code) => setPlayer({ p, code })} />{pageArches(flipSnap.current.front.type)}</div>
+                  <div className="flip-face back"><Panel spec={flipSnap.current.back} owned={owned} onPick={(p, code) => setPlayer({ p, code })} />{pageArches(flipSnap.current.back.type)}</div>
+                </div>
+              )}
 
-            {/* flechas dentro del libro */}
-            <button className="alb-arrow left" disabled={current === 0 || !!flip} onClick={flipBackward} aria-label="Anterior">‹</button>
-            <button className="alb-arrow right" disabled={current === SPREADS.length - 1 || !!flip} onClick={flipForward} aria-label="Siguiente">›</button>
-          </div>
+              {/* flechas dentro del libro */}
+              <button className="alb-arrow left" disabled={current === 0 || !!flip} onClick={flipBackward} aria-label="Anterior">‹</button>
+              <button className="alb-arrow right" disabled={current === SPREADS.length - 1 || !!flip} onClick={flipForward} aria-label="Siguiente">›</button>
+            </div>
+          )}
         </div>
 
+        {/* nav mobile: botones claros debajo de la página */}
+        {isMobile && (
+          <div className="mob-nav">
+            <button className="mob-nav-btn" disabled={mIdx === 0} onClick={mPrev}>‹ Anterior</button>
+            <span className="mob-nav-count">{mIdx + 1} / {flat.length}</span>
+            <button className="mob-nav-btn" disabled={mIdx === flat.length - 1} onClick={mNext}>Siguiente ›</button>
+          </div>
+        )}
+
         {/* progreso del libro + chips */}
-        <div className="alb-book-track"><i style={{ width: `${(current / (SPREADS.length - 1)) * 100}%` }} /></div>
+        <div className="alb-book-track"><i style={{ width: `${(isMobile ? mIdx / (flat.length - 1) : current / (SPREADS.length - 1)) * 100}%` }} /></div>
         <div className="chips">
-          <button className={`chip${current === 0 ? " active" : ""}`} onClick={() => jumpTo(0)}>Tapa</button>
-          <div className="chip-divider" />
-          {SPREADS.slice(1).map((sp, i) => (
-            <button key={sp.code} className={`chip${current === i + 1 ? " active" : ""}`} onClick={() => jumpTo(i + 1)}>{sp.label}</button>
-          ))}
+          {(() => { const activeSpread = isMobile ? flat[mIdx].spread : current; return (
+            <>
+              <button className={`chip${activeSpread === 0 ? " active" : ""}`} onClick={() => jumpTo(0)}>Tapa</button>
+              <div className="chip-divider" />
+              {SPREADS.slice(1).map((sp, i) => (
+                <button key={sp.code} className={`chip${activeSpread === i + 1 ? " active" : ""}`} onClick={() => jumpTo(i + 1)}>{sp.label}</button>
+              ))}
+            </>
+          ); })()}
         </div>
 
         <div className="alb-soon">

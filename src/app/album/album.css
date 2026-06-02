@@ -617,16 +617,37 @@
 
 /* ── Responsive ────────────────────────────────────────────── */
 @media (max-width: 760px){
-  .fx-album .book{ aspect-ratio: 920 / 1100; }
-  .fx-album .page-stack{ grid-template-columns: 1fr; }
-  .fx-album .page-stack::before{ display:none; }
-  .fx-album .page-left{ display:none; }
-  .fx-album .page-right{ border-radius:6px; box-shadow: 0 0 0 1px rgba(0,0,0,.07); }
+  /* el libro se aplana: una sola página, altura según contenido (no recorta) */
+  .album-shell{ padding:34px 4px 8px; }
+  .fx-album .mob-book{ aspect-ratio:auto; height:auto; perspective:none; }
+  .fx-album .mob-page{
+    position:relative; width:100%; min-height:60vh;
+    border-radius:8px; overflow:hidden;
+    box-shadow:0 0 0 1px rgba(0,0,0,.07), 0 12px 30px rgba(0,0,0,.4);
+  }
   .fx-album .gp-letter{ font-size:60px; }
   .fx-album .cover-emblem{ width:170px; }
   .fx-album .cover-title{ font-size:28px; }
-  .fx-album .album-nav{ flex-direction:column; gap:10px; }
-  .fx-album .album-position{ order:-1; }
+}
+
+/* nav mobile (Anterior / contador / Siguiente) */
+.mob-nav{
+  width:min(1040px,100%); margin:16px auto 0;
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+}
+.mob-nav-btn{
+  flex:1; max-width:160px;
+  font-family:var(--font-head); font-weight:800; font-size:14px; letter-spacing:.3px;
+  color:#04121c; background:var(--celeste); border:none;
+  padding:13px 14px; border-radius:var(--r-xs,10px); cursor:pointer;
+  box-shadow:0 6px 18px var(--celeste-glow, rgba(79,184,232,.35));
+  transition:background .15s ease, transform .12s ease;
+}
+.mob-nav-btn:active{ transform:translateY(1px); }
+.mob-nav-btn:disabled{ opacity:.32; box-shadow:none; cursor:default; }
+.mob-nav-count{
+  font-family:var(--font-head); font-weight:800; font-size:12px; letter-spacing:1px;
+  color:var(--muted-light); text-transform:uppercase; white-space:nowrap;
 }
 
 

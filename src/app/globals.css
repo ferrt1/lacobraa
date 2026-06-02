@@ -56,9 +56,13 @@
 }
 
 *{ box-sizing:border-box; }
-html{ scroll-behavior:smooth; }
+html{ scroll-behavior:smooth; overflow-x:clip; width:100%; }
 body{
   margin:0;
+  position:relative;
+  width:100%;
+  max-width:100%;
+  overflow-x:clip;
   font-family:var(--font-sans);
   font-weight:500;
   font-size:16px;
@@ -66,7 +70,6 @@ body{
   background:var(--midnight);
   -webkit-font-smoothing:antialiased;
   text-rendering:optimizeLegibility;
-  overflow-x:hidden;
 }
 a{ color:inherit; text-decoration:none; }
 button{ font-family:inherit; cursor:pointer; }
@@ -188,6 +191,9 @@ img{ display:block; max-width:100%; }
 }
 .drawer a:active{ color:var(--celeste); }
 .drawer .btn{ margin-top:18px; width:100%; padding:15px; font-size:15px; }
+/* Kick dentro del menú: verde como en desktop, pero texto negro
+   (.drawer a lo pintaba blanco) */
+.drawer .btn-kick{ color:#0a1505; }
 
 /* ═══════════════════════════════════════════════════════════════
    GUIRNALDA DE BANDERINES (sutil, cuelga de un lado)
@@ -536,6 +542,7 @@ section{ position:relative; }
 @media (max-width:760px){
   .nav-links{ display:none; }
   .nav-right .btn-ghost{ display:none; }
+  .nav-right .btn-kick{ display:none; }   /* el Kick vive dentro del menú (3 líneas) */
   .hamb{ display:flex; }
   .stats-grid{ grid-template-columns:repeat(2,1fr); }
   .stat{ border-right:1px solid var(--border); border-bottom:1px solid var(--border); }
@@ -991,6 +998,12 @@ section{ position:relative; }
   /* botones apilados full-width */
   .hv-goal .hero-cta{ flex-direction:column; align-items:stretch; gap:10px; margin-top:18px; }
   .hv-goal .hero-cta .btn{ justify-content:center; }
+
+  /* sin arco SVG, el pasto deja de ir al 87% del alto (caía sobre los botones).
+     Su borde superior baja a 104px del fondo (debajo de los CTAs) y sigue
+     full-bleed hacia abajo para que el suelo sea continuo bajo el countdown. */
+  .goal{ padding-bottom:104px; }
+  .goal-floor{ top:auto; bottom:-50vh; height:calc(50vh + 104px); }
 }
 
 /* ═══════════════════════════════════════════════════════════════
